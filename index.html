@@ -5,323 +5,191 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Condolence Letter Generator</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <!-- Calibri-compatible font -->
+  <link href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
-    :root{
-      --bg:#f4f7fb;
-      --card:#ffffff;
-      --accent:#0b75d6;
-      --accent-2:#06b6d4;
-      --muted:#64748b;
-      --radius:12px;
-      --page-width:216mm; /* Letter width (8.5in) */
-      --page-height:279.4mm; /* Letter height (11in) */
+    :root {
+      --page-width:210mm;   /* A4 width */
+      --page-height:297mm;  /* A4 height */
     }
-    *{box-sizing:border-box}
-    body{
+
+    body {
       margin:0;
-      font-family: 'Inter', system-ui,-apple-system, "Segoe UI", Roboto, Arial;
-      background: linear-gradient(180deg,#f7fbff 0%,var(--bg) 100%);
-      color:#0f172a;
-      padding:28px;
-    }
-    .container{
-      max-width:1100px;
-      margin:0 auto;
-      display:grid;
-      grid-template-columns: 420px 1fr;
-      gap:24px;
-      align-items:start;
-    }
-    .card{
-      background:var(--card);
-      border-radius:var(--radius);
-      box-shadow: 0 6px 18px rgba(12, 18, 40, 0.06);
+      font-family:'Carlito', Calibri, sans-serif;
+      background:#f7f9fb;
       padding:20px;
     }
-    header.site-header{display:flex;gap:12px;align-items:center;margin-bottom:12px}
-    .logo{width:46px;height:46px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;font-weight:700}
-    h1{margin:0;font-size:18px}
-    p.sub{margin:0;color:var(--muted);font-size:13px}
-
-    form .field{margin-bottom:12px}
-    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
-    input[type="text"], textarea, select{
-      width:100%;
-      padding:10px 12px;
-      border-radius:8px;
-      border:1px solid #e6eef8;
-      background:#fbfdff;
-      font-size:14px;
-    }
-    textarea{min-height:80px;resize:vertical}
-    .small{font-size:12px;color:#94a3b8;margin-top:6px}
-
-    .actions{display:flex;gap:10px;margin-top:10px;align-items:center}
-    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;border:0;cursor:pointer;font-weight:600;font-size:14px}
-    .btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#fff}
-    .btn-secondary{background:transparent;border:1px solid #e6eef8;color:var(--muted)}
-
-    .preview-frame{border-radius:10px;border:1px solid #e6eef8;padding:12px;background:linear-gradient(180deg,#fff,#fbfdff);min-height:420px;overflow:auto}
-    .preview-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-    .note{font-size:13px;color:var(--muted)}
-
-    /* printable page */
-    .page{
-      width:var(--page-width);
-      min-height:var(--page-height);
-      padding: 25mm 20mm; /* top right bottom left — EDIT these to exact Word margins */
-      box-sizing:border-box;
-      background:white;
-      font-family: "Times New Roman", Times, serif;
-      font-size:12pt;
-      color:#000;
-      line-height:1.45;
+    .container {
+      display:grid;
+      grid-template-columns:400px 1fr;
+      gap:20px;
+      max-width:1100px;
       margin:0 auto;
     }
-    .meta{text-align:right;margin-bottom:6mm}
-    .to{margin-top:6mm;margin-bottom:6mm}
-    .content{white-space:pre-wrap}
-    .signature-row{display:flex;justify-content:space-between;margin-top:30mm}
-    .signature{font-weight:600}
+    .card {
+      background:#fff;
+      padding:16px;
+      border-radius:8px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.1);
+    }
+    h1 {margin:0 0 12px 0;font-size:18px;font-weight:600}
+    label{display:block;margin-top:10px;font-size:13px;color:#444}
+    input,select,textarea{
+      width:100%;
+      padding:8px 10px;
+      font-family:'Carlito', Calibri, sans-serif;
+      font-size:14px;
+      border:1px solid #ccc;
+      border-radius:6px;
+    }
+    textarea{min-height:60px;resize:vertical}
+    .btn{margin-top:14px;padding:10px 14px;border:none;border-radius:6px;cursor:pointer;font-weight:600}
+    .btn-primary{background:#0b75d6;color:#fff}
+    .preview-frame{background:#fff;border:1px solid #ddd;border-radius:8px;padding:12px;overflow:auto}
 
-    @media(max-width:980px){ .container{grid-template-columns:1fr} }
+    /* Printable letter */
+    .page {
+      width:var(--page-width);
+      min-height:var(--page-height);
+      padding:25.4mm; /* 1 inch margins all around */
+      background:#fff;
+      font-size:12pt;
+      font-family:'Carlito', Calibri, sans-serif;
+      line-height:1.5;
+      color:#000;
+    }
+    .meta{text-align:right;margin-bottom:12mm}
+    .to{margin-bottom:14mm}
+    .to .recipient{font-weight:bold}
+    .body-paragraph{margin:8mm 0;text-align:justify}
+    .signatures{display:flex;justify-content:space-between;margin-top:20mm}
+    .sig-block{font-weight:bold}
+    .sig-title{font-weight:400;font-size:11pt}
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- left: form -->
+    <!-- Left: form -->
     <div class="card">
-      <header class="site-header">
-        <div class="logo">CL</div>
-        <div>
-          <h1>Condolence PDF Generator</h1>
-          <p class="sub">Fill details → Preview → Generate & Download</p>
-        </div>
-      </header>
+      <h1>Condolence Letter Generator</h1>
+      <label>Date</label>
+      <input id="date" type="text" placeholder="e.g., 10 September 2025" />
 
-      <form id="form" onsubmit="return false;">
-        <div class="field">
-          <label for="date">Date</label>
-          <input id="date" type="text" placeholder="e.g., September 10, 2025" />
-          <div class="small">If blank, today's date will be used.</div>
-        </div>
+      <label>Recipient / Member name</label>
+      <input id="member" type="text" placeholder="e.g., Rajneesh Parek" />
 
-        <div class="field">
-          <label for="deceased">Deceased person name</label>
-          <input id="deceased" type="text" placeholder="Full name (e.g., Rajneesh Parakh)" required />
-        </div>
+      <label>Deceased person name</label>
+      <input id="deceased" type="text" placeholder="e.g., Madhubala Pareek" />
 
-        <div class="field">
-          <label for="gender">Deceased gender</label>
-          <select id="gender">
-            <option value="unspecified">Unspecified / Prefer not to say (they/their)</option>
-            <option value="male">Male (he/his)</option>
-            <option value="female">Female (she/her)</option>
-            <option value="other">Other / Nonbinary (they/their)</option>
-          </select>
-        </div>
+      <label>Relation</label>
+      <input id="relation" type="text" placeholder="e.g., mother" />
 
-        <div class="field">
-          <label for="member">Recipient / Member name</label>
-          <input id="member" type="text" placeholder="Name of family member or recipient" required />
-        </div>
+      <label>Gender</label>
+      <select id="gender">
+        <option value="female">Female (she/her)</option>
+        <option value="male">Male (he/his)</option>
+        <option value="other">Other (they/their)</option>
+      </select>
 
-        <div class="field">
-          <label for="relation">Relation (e.g., Mother, Brother)</label>
-          <input id="relation" type="text" placeholder="Relation to deceased" required/>
-        </div>
-
-        <div class="field">
-          <label for="message">Optional short message</label>
-          <textarea id="message" placeholder="A short personal sentence (optional)"></textarea>
-        </div>
-
-        <div class="actions">
-          <button id="generateBtn" class="btn btn-primary" type="button">
-            <!-- download icon -->
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M12 3v12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 11l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Generate & Download PDF
-          </button>
-
-          <button id="previewPngBtn" class="btn btn-secondary" type="button">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 10l5-5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Download Preview (PNG)
-          </button>
-
-          <div style="margin-left:auto" class="note">Tip: Print at 100% / Actual size.</div>
-        </div>
-      </form>
-
-      <hr style="margin:14px 0;border:none;border-top:1px solid #eef6ff" />
-
-      <div class="note">
-        To match Word exactly: set the .page padding above and the jsPDF/html2pdf margins in the script to the Word margins.
-      </div>
+      <button id="generateBtn" class="btn btn-primary">Generate & Download PDF</button>
     </div>
 
-    <!-- right: preview -->
-    <div>
-      <div class="card preview-frame">
-        <div class="preview-header">
-          <div>
-            <div style="font-weight:700">Live Preview</div>
-            <div style="font-size:13px;color:var(--muted)">Preview of the printed letter (no header image — suitable for printing on pre-printed letterhead).</div>
-          </div>
-          <div style="font-size:12px;color:var(--muted)">Page size: Letter (8.5″ × 11″)</div>
+    <!-- Right: preview -->
+    <div class="preview-frame">
+      <div class="page" id="page">
+        <div class="meta" id="metaDate">10 September 2025</div>
+
+        <div class="to">
+          To,<br>
+          Rtn. <span class="recipient" id="previewMember">Rajneesh Parek</span>,
         </div>
 
-        <div id="pageContainer" style="display:flex;justify-content:center;">
-          <div class="page" id="page">
-            <!-- NOTE: no letterhead image here — leave blank so printing on pre-printed paper lines up -->
-            <div style="height:8mm"></div>
-
-            <div class="meta" id="metaDate">DATE</div>
-
-            <div class="to" id="toBlock">
-              To,<br>
-              <span id="previewMember" style="font-weight:600">Member Name</span>,
-            </div>
-
-            <div class="content" id="previewContent">
-              <span id="p_intro">We extend our deepest condolences on the passing of your <span id="previewRelation">Relation</span> <span id="previewDeceased">Deceased Name</span>.</span>
-
-              <br><br>
-
-              <span id="p_support">In this difficult time, we stand with you and your family and offer our support. <span id="previewOptionalMessage"></span></span>
-
-              <br><br>
-
-              <span id="p_prayer">May <span id="pronoun_subject">their</span> soul rest in peace and may you find the strength to bear this loss.</span>
-            </div>
-
-            <div class="signature-row">
-              <div>
-                Warm Regards,<br><br>
-                <div class="signature">Rtn. Rajesh Kumar Narula<br><span style="font-weight:400">(President)</span></div>
-              </div>
-              <div>
-                <div style="height:48px"></div>
-                <div class="signature">Rtn. Dr. D.S. Rathore<br><span style="font-weight:400">(Secretary)</span></div>
-              </div>
-            </div>
-
-          </div>
+        <div class="body-paragraph" id="para1">
+          We extend our deepest condolences on the passing of your <span id="previewRelation">mother</span> <span id="previewDeceased">Madhubala Pareek</span> for the untimely loss of <span id="pronObj">her</span> life. Losing a family member is always difficult to face.
         </div>
 
+        <div class="body-paragraph" id="para2">
+          In this tough period of your life's journey, we are committed to being there for you. In light of the loss of your <span id="repeatRelation">mother</span>, we are sympathetic to your efforts to move forward with your life's work.
+        </div>
+
+        <div class="body-paragraph" id="para3">
+          <span id="pronSubj">She</span> will always be remembered with great admiration. May God give strength to you & your family during this difficult time.
+        </div>
+
+        <div class="signatures">
+          <div class="sig-block">
+            Warm Regards,<br><br>
+            Rtn. Rajesh Kumar Narula<br>
+            <span class="sig-title">(President)</span>
+          </div>
+          <div class="sig-block" style="text-align:right">
+            Rtn. Dr. D.S. Rathore<br>
+            <span class="sig-title">(Secretary)</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- html2pdf -->
   <script src="https://unpkg.com/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
-
   <script>
-    // Utilities
     function readableToday(){
-      const d = new Date();
-      return d.toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' });
+      const d=new Date();
+      return d.toLocaleDateString(undefined,{day:'2-digit',month:'long',year:'numeric'});
     }
 
-    // Elements
-    const dateEl = document.getElementById('date');
-    const deceasedEl = document.getElementById('deceased');
-    const genderEl = document.getElementById('gender');
-    const memberEl = document.getElementById('member');
-    const relationEl = document.getElementById('relation');
-    const messageEl = document.getElementById('message');
+    const dateEl=document.getElementById('date'),
+          memberEl=document.getElementById('member'),
+          deceasedEl=document.getElementById('deceased'),
+          relationEl=document.getElementById('relation'),
+          genderEl=document.getElementById('gender');
 
-    const metaDate = document.getElementById('metaDate');
-    const previewDeceased = document.getElementById('previewDeceased');
-    const previewMember = document.getElementById('previewMember');
-    const previewRelation = document.getElementById('previewRelation');
-    const previewOptionalMessage = document.getElementById('previewOptionalMessage');
+    const metaDate=document.getElementById('metaDate'),
+          prevMember=document.getElementById('previewMember'),
+          prevDeceased=document.getElementById('previewDeceased'),
+          prevRelation=document.getElementById('previewRelation'),
+          repeatRelation=document.getElementById('repeatRelation'),
+          pronObj=document.getElementById('pronObj'),
+          pronSubj=document.getElementById('pronSubj');
 
-    const pronounSubject = document.getElementById('pronoun_subject'); // their/he/she
-    const p_intro = document.getElementById('p_intro');
-    const p_support = document.getElementById('p_support');
-    const p_prayer = document.getElementById('p_prayer');
-
-    // pronoun map
-    const PRONOUNS = {
-      male:   { subject: 'he',    object: 'him',   possessive: 'his' },
-      female: { subject: 'she',   object: 'her',   possessive: 'her' },
-      other:  { subject: 'they',  object: 'them',  possessive: 'their' },
-      unspecified: { subject: 'their', object: 'them', possessive: 'their' } // use 'their' when gender unknown in some contexts
+    const PR={
+      male:{obj:'his',subj:'He'},
+      female:{obj:'her',subj:'She'},
+      other:{obj:'their',subj:'They'}
     };
 
-    // Update preview
     function updatePreview(){
-      metaDate.textContent = dateEl.value.trim() || readableToday();
-      previewDeceased.textContent = deceasedEl.value.trim() || '—';
-      previewMember.textContent = memberEl.value.trim() || '—';
-      previewRelation.textContent = relationEl.value.trim() || '—';
-      previewOptionalMessage.textContent = messageEl.value.trim() ? messageEl.value.trim() : '';
-
-      // pronouns selection
-      const g = genderEl.value || 'unspecified';
-      const p = PRONOUNS[g] || PRONOUNS.unspecified;
-
-      // Update sentences with appropriate pronouns
-      // p_intro already contains full sentence; we just replace placeholders
-      // We'll update p_prayer and maybe support sentence to use possessive pronoun
-      pronounSubject.textContent = (g === 'male' || g === 'female') ? p.possessive : p.possessive;
-
-      // If you want sentences to refer "he/she" vs "their", adjust text:
-      // Example: "May their soul rest in peace" -> we use possessive pronoun (his/her/their)
-      p_prayer.innerHTML = 'May ' + p.possessive + ' soul rest in peace and may you find the strength to bear this loss.';
-
-      // Use object/possessive in support sentence if message present
-      if (messageEl.value.trim()){
-        p_support.innerHTML = 'In this difficult time, we stand with you and your family and offer our support. ' + '<em>' + previewOptionalMessage.textContent + '</em>';
-      } else {
-        p_support.innerHTML = 'In this difficult time, we stand with you and your family and offer our support.';
-      }
+      metaDate.textContent=dateEl.value.trim()||readableToday();
+      prevMember.textContent=memberEl.value.trim()||'—';
+      prevDeceased.textContent=deceasedEl.value.trim()||'—';
+      prevRelation.textContent=relationEl.value.trim()||'—';
+      repeatRelation.textContent=relationEl.value.trim()||'—';
+      const g=PR[genderEl.value]||PR.other;
+      pronObj.textContent=g.obj;
+      pronSubj.textContent=g.subj;
     }
 
-    // events
-    [dateEl, deceasedEl, genderEl, memberEl, relationEl, messageEl].forEach(el=>{
-      el.addEventListener('input', updatePreview);
-      el.addEventListener('change', updatePreview);
+    [dateEl,memberEl,deceasedEl,relationEl,genderEl].forEach(el=>{
+      el.addEventListener('input',updatePreview);
+      el.addEventListener('change',updatePreview);
     });
 
-    // initialize
-    document.addEventListener('DOMContentLoaded', ()=>{
-      if(!dateEl.value) dateEl.value = readableToday();
+    document.getElementById('generateBtn').addEventListener('click',()=>{
       updatePreview();
-    });
-
-    // Generate PDF
-    document.getElementById('generateBtn').addEventListener('click', ()=>{
-      updatePreview();
-      const element = document.getElementById('page');
-
-      // PDF options — IMPORTANT: change margin array to match Word margins (in inches)
-      // Default here: approx 25mm top/bottom and 20mm left/right -> [0.98,0.79,0.98,0.79]
-      const opt = {
-        margin:       [0.98, 0.79, 0.98, 0.79], // top, right, bottom, left (in inches)
-        filename:     `condolence_${(deceasedEl.value || 'deceased').trim().replace(/\s+/g,'_')}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
-        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' } // change format to 'a4' if needed
+      const element=document.getElementById('page');
+      const opt={
+        margin:[25.4,25.4,25.4,25.4], // top,right,bottom,left in mm
+        filename:`condolence_${(deceasedEl.value||'deceased').replace(/\s+/g,'_')}.pdf`,
+        image:{type:'jpeg',quality:0.98},
+        html2canvas:{scale:2},
+        jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
       };
-
-      // create and save PDF
       html2pdf().set(opt).from(element).save();
     });
 
-    // Download preview as PNG (optional)
-    document.getElementById('previewPngBtn').addEventListener('click', ()=>{
-      updatePreview();
-      const element = document.getElementById('page');
-      html2canvas(element, { scale: 2, useCORS: true }).then(canvas=>{
-        const link = document.createElement('a');
-        link.download = 'preview.png';
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-      });
-    });
+    document.addEventListener('DOMContentLoaded',updatePreview);
   </script>
 </body>
 </html>
