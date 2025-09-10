@@ -3,20 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Condolence Letter — A4 (Visual Margin Editor)</title>
+  <title>Condolence Letter — A4 Editor</title>
 
-  <!-- Carlito (Calibri-compatible) -->
+  <!-- Calibri-compatible font -->
   <link href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --page-width:210mm;  /* A4 */
-      --page-height:297mm;
-      --pad-top:25.4mm;
-      --pad-right:25.4mm;
-      --pad-bottom:25.4mm;
-      --pad-left:25.4mm;
-      --ruler-size:30px;
+      --a4-w:210mm;
+      --a4-h:297mm;
     }
 
     *{box-sizing:border-box}
@@ -24,378 +19,311 @@
       margin:0;
       font-family:'Carlito', Calibri, sans-serif;
       background:#f4f7fb;
-      padding:18px;
-      color:#0b2540;
+      padding:16px;
+      color:#102135;
     }
 
-    .app {
-      max-width:1200px;
-      margin:0 auto;
-      display:grid;
-      grid-template-columns:360px 1fr;
-      gap:18px;
-    }
+    .app{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:360px 1fr;gap:16px}
+    .panel{background:#fff;padding:12px;border-radius:10px;box-shadow:0 8px 24px rgba(10,20,40,0.06)}
+    h2{margin:0 0 8px 0;font-size:17px}
+    label{display:block;margin-top:10px;color:#44556b;font-size:13px}
+    input[type="number"], input[type="text"], select, textarea{width:100%;padding:8px;border-radius:6px;border:1px solid #dceaf6;font-family:'Carlito', Calibri, sans-serif}
+    textarea{min-height:100px;resize:vertical}
 
-    .panel {
-      background:#fff;
-      padding:14px;
-      border-radius:10px;
-      box-shadow:0 6px 20px rgba(10,20,40,0.06);
-    }
-
-    h2{margin:0 0 10px 0;font-size:18px}
-    label{display:block;margin-top:10px;font-size:13px;color:#3b4b63}
     .row{display:flex;gap:8px;align-items:center;margin-top:8px}
-    input[type="number"]{width:80px;padding:8px;border-radius:6px;border:1px solid #d7e3f2}
-    input[type="range"]{flex:1}
+    .row input[type="range"]{flex:1}
+    .btn{margin-top:12px;padding:10px 12px;border-radius:8px;border:0;background:linear-gradient(90deg,#0b75d6,#06b6d4);color:#fff;font-weight:700;cursor:pointer}
 
-    .small{font-size:13px;color:#617089;margin-top:8px}
+    /* preview area */
+    .preview-wrap{padding:12px}
+    .preview-toolbar{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .preview-viewport{background:#eaf4ff;padding:12px;border-radius:8px;border:1px solid #d6e9fb;overflow:auto}
 
-    .controls-grid{display:grid;grid-template-columns:1fr;gap:10px}
-
-    .btn{
-      display:inline-flex;gap:8px;align-items:center;
-      padding:10px 14px;border-radius:8px;border:0;background:linear-gradient(90deg,#0b75d6,#06b6d4);color:#fff;font-weight:700;margin-top:12px;cursor:pointer;
-    }
-
-    /* Preview area */
-    .preview-wrap{position:relative;padding:12px}
-    .preview-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-    .preview-viewport{background:#edf3fb;padding:14px;border-radius:8px;border:1px solid #e2edf9;overflow:auto}
-
-    /* Ruler container */
-    .ruler-container{display:flex;gap:12px}
-    .ruler-vert{
-      width:var(--ruler-size);
-      height:calc(var(--page-height) * 0.45); /* visual scaling in viewport */
-      background-image: linear-gradient(to bottom, #ccd9ea 1px, transparent 1px);
-      background-size: 1mm 1mm;
-      border-right:1px solid #e6eef8;
-      box-shadow:inset -1px 0 0 rgba(0,0,0,0.02);
-    }
-    .ruler-horz{
-      height:var(--ruler-size);
-      width:calc(var(--page-width) * 0.45);
-      background-image: linear-gradient(to right, #ccd9ea 1px, transparent 1px);
-      background-size: 1mm 1mm;
-      border-bottom:1px solid #e6eef8;
-      box-shadow:inset 0 -1px 0 rgba(0,0,0,0.02);
-    }
-
-    /* Page preview scaled down */
-    .page-outer{position:relative; background:#fff; border:1px solid #dbeaf8; border-radius:6px; display:inline-block; box-shadow:0 8px 20px rgba(9,30,63,0.04);}
+    /* scaled preview container */
+    .preview-stage{display:flex;justify-content:center;padding:18px}
+    .page-outer{background:#fff;border:1px solid #dbeaf8;border-radius:6px;box-shadow:0 10px 28px rgba(9,30,63,0.04);overflow:hidden}
     .page {
-      width: calc(var(--page-width) * 0.45); /* scale to fit */
-      height: calc(var(--page-height) * 0.45);
-      background:white;
-      position:relative;
-      box-sizing:border-box;
-      /* apply padding from CSS variables (mm units will be respected by browsers) */
-      padding: calc(var(--pad-top) * 0.45) calc(var(--pad-right) * 0.45) calc(var(--pad-bottom) * 0.45) calc(var(--pad-left) * 0.45);
-      font-family:'Carlito', Calibri, sans-serif;
-      font-size:12pt;
-      line-height:1.5;
-      color:#000;
+      width: var(--a4-w);
+      height: var(--a4-h);
+      background: white;
+      box-sizing: border-box;
+      position: relative;
+      transform-origin: top left;
+      /* default padding will be set inline by JS (mm values) */
     }
 
-    /* guideline overlay lines (thin, subtle) */
-    .guide-top, .guide-bottom { position:absolute; left:0; right:0; height:1px; background:rgba(11,55,100,0.18); pointer-events:none; }
-    .guide-left, .guide-right { position:absolute; top:0; bottom:0; width:1px; background:rgba(11,55,100,0.18); pointer-events:none; }
+    /* guideline lines */
+    .guide-top, .guide-bottom { position:absolute; left:0; right:0; height:1px; background:rgba(11,55,100,0.16); pointer-events:none; }
+    .guide-left, .guide-right { position:absolute; top:0; bottom:0; width:1px; background:rgba(11,55,100,0.16); pointer-events:none; }
 
-    /* content inside the page preview uses unscaled layout */
-    .page .meta{ text-align:right; margin-bottom:18px }
-    .page .to{ margin-bottom:20px }
-    .page .to .recipient{ font-weight:bold }
-    .page .body-paragraph{ margin:14px 0; text-align:justify }
-    .page .signatures{ display:flex; justify-content:space-between; margin-top:30px }
-    .note { font-size:13px; color:#445766; margin-top:10px }
+    /* letter content styling (uses Calibri-like font) */
+    .letter { font-family:'Carlito', Calibri, sans-serif; color:#000; }
+    .letter .meta { text-align:right; margin-bottom:12mm }
+    .letter .to { margin-bottom:14mm }
+    .letter .to .recipient { font-weight:700 }
+    .letter .body-paragraph { margin:10mm 0; text-align:justify }
+    .letter .signatures { display:flex; justify-content:space-between; margin-top:24mm }
+    .letter .sig-title { font-weight:400; font-size:11pt }
 
-    /* input grid small screen */
-    @media(max-width:980px){
-      .app{grid-template-columns:1fr; padding-bottom:40px}
-      .ruler-vert{display:none}
-    }
+    .note{font-size:13px;color:#4b657a;margin-top:10px}
+    @media(max-width:980px){ .app{grid-template-columns:1fr} }
   </style>
 </head>
 <body>
   <div class="app">
-    <!-- Controls panel -->
+    <!-- Controls -->
     <div class="panel">
-      <h2>Margins & Content</h2>
-      <div class="small">Use the sliders or number inputs (mm). Watch the rulers and thin guideline lines on the preview to align with your physical letterhead.</div>
+      <h2>Page / Margin Controls</h2>
 
-      <div style="margin-top:12px">
-        <label>Top margin (mm)</label>
-        <div class="row">
-          <input id="topRange" type="range" min="0" max="80" value="25.4" step="0.1" />
-          <input id="topNumber" type="number" min="0" max="80" step="0.1" value="25.4" />
-        </div>
+      <label>Top margin (mm)</label>
+      <div class="row"><input id="topRange" type="range" min="0" max="80" step="0.1" value="25.4"><input id="topNum" type="number" min="0" max="80" step="0.1" value="25.4"></div>
 
-        <label>Right margin (mm)</label>
-        <div class="row">
-          <input id="rightRange" type="range" min="0" max="80" value="25.4" step="0.1" />
-          <input id="rightNumber" type="number" min="0" max="80" step="0.1" value="25.4" />
-        </div>
+      <label>Right margin (mm)</label>
+      <div class="row"><input id="rightRange" type="range" min="0" max="80" step="0.1" value="25.4"><input id="rightNum" type="number" min="0" max="80" step="0.1" value="25.4"></div>
 
-        <label>Bottom margin (mm)</label>
-        <div class="row">
-          <input id="bottomRange" type="range" min="0" max="80" value="25.4" step="0.1" />
-          <input id="bottomNumber" type="number" min="0" max="80" step="0.1" value="25.4" />
-        </div>
+      <label>Bottom margin (mm)</label>
+      <div class="row"><input id="bottomRange" type="range" min="0" max="80" step="0.1" value="25.4"><input id="bottomNum" type="number" min="0" max="80" step="0.1" value="25.4"></div>
 
-        <label>Left margin (mm)</label>
-        <div class="row">
-          <input id="leftRange" type="range" min="0" max="80" value="25.4" step="0.1" />
-          <input id="leftNumber" type="number" min="0" max="80" step="0.1" value="25.4" />
-        </div>
+      <label>Left margin (mm)</label>
+      <div class="row"><input id="leftRange" type="range" min="0" max="80" step="0.1" value="25.4"><input id="leftNum" type="number" min="0" max="80" step="0.1" value="25.4"></div>
 
-        <hr style="margin:12px 0;border:none;border-top:1px solid #eef6ff">
+      <hr style="margin:12px 0;border:none;border-top:1px solid #eef6ff">
 
-        <label>Recipient / Member name</label>
-        <input id="member" type="text" placeholder="Rtn. Rajneesh Parek" />
+      <h2>Editor & Typography</h2>
+      <label>Font size (pt)</label>
+      <div class="row"><input id="fontRange" type="range" min="8" max="18" step="0.5" value="12"><input id="fontNum" type="number" min="8" max="18" step="0.5" value="12"></div>
 
-        <label>Relation</label>
-        <input id="relation" type="text" placeholder="mother / brother" />
+      <label>Preview scale (%)</label>
+      <div class="row"><input id="scaleRange" type="range" min="20" max="100" step="1" value="45"><input id="scaleNum" type="number" min="20" max="100" step="1" value="45"></div>
 
-        <label>Deceased person name</label>
-        <input id="deceased" type="text" placeholder="Madhubala Pareek" />
+      <label>Recipient / Member name</label>
+      <input id="member" type="text" placeholder="Rtn. Rajneesh Parek">
 
-        <label>Gender</label>
-        <select id="gender">
-          <option value="female">Female (she / her)</option>
-          <option value="male">Male (he / his)</option>
-          <option value="other">Other (they / their)</option>
-        </select>
+      <label>Relation</label>
+      <input id="relation" type="text" placeholder="mother">
 
-        <div style="margin-top:12px">
-          <button id="generateBtn" class="btn">Generate & Download PDF</button>
-          <div style="display:inline-block;margin-left:12px;font-size:13px;color:#42566b">A4 / mm units</div>
-        </div>
+      <label>Deceased person name</label>
+      <input id="deceased" type="text" placeholder="Madhubala Pareek">
 
-        <div class="note">Tip: Position a physical letterhead page next to your screen and slide the guides to match the printed header/footer position; then generate PDF and print at 100% scale.</div>
+      <label>Gender</label>
+      <select id="gender"><option value="female">Female (she/her)</option><option value="male">Male (he/his)</option><option value="other">Other (they/their)</option></select>
+
+      <label style="margin-top:10px">Letter body (editable) — paste exact matter below</label>
+      <textarea id="bodyText">We extend our deepest condolences on the passing of your <Relation> <Deceased> for the untimely loss of <her> life. Losing a family member is always difficult to face.
+
+In this tough period of your life's journey, we are committed to being there for you. In light of the loss of your <Relation>, we are sympathetic to your efforts to move forward with your life's work.
+
+<She> will always be remembered with great admiration. May God give strength to you & your family during this difficult time.</textarea>
+
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button id="generateBtn" class="btn">Generate & Download PDF</button>
+        <button id="resetBtn" class="btn" style="background:#e6eef8;color:#0b75d6">Reset to defaults</button>
       </div>
+
+      <div class="note">Use the preview scale to zoom the page. When satisfied, click Generate. Print PDF at 100% Actual size.</div>
     </div>
 
-    <!-- Preview panel -->
+    <!-- Preview -->
     <div class="panel preview-wrap">
-      <div class="preview-topbar">
-        <div><strong>Live preview (scaled)</strong></div>
-        <div style="color:#51667a">Ruler = 1 mm ticks</div>
+      <div class="preview-toolbar">
+        <div><strong>Live A4 preview</strong></div>
+        <div style="color:#4b667a">Scaled preview — adjust scale to avoid cropping</div>
       </div>
 
       <div class="preview-viewport">
-        <div class="ruler-container" style="align-items:flex-start">
-          <div class="ruler-vert" id="vertRuler"></div>
+        <div class="preview-stage">
+          <div class="page-outer" id="pageOuter">
+            <div class="page letter" id="page">
+              <!-- overlay guides -->
+              <div class="guide-top" id="guideTop"></div>
+              <div class="guide-bottom" id="guideBottom"></div>
+              <div class="guide-left" id="guideLeft"></div>
+              <div class="guide-right" id="guideRight"></div>
 
-          <div style="display:flex;flex-direction:column;gap:6px">
-            <div class="ruler-horz" id="horRuler"></div>
+              <!-- content -->
+              <div class="meta" id="metaDate">10 September 2025</div>
+              <div class="to">To,<br>Rtn. <span id="previewMember" class="recipient">—</span>,</div>
+              <div id="contentHtml">
+                <!-- inserted by JS -->
+              </div>
 
-            <div style="display:flex;gap:12px;align-items:flex-start">
-              <div style="width: calc(var(--page-width) * 0.45);"> <!-- spacer to align ruler -->
-                <div class="page-outer" id="pageOuter">
-                  <div class="page" id="page">
-                    <!-- guideline lines -->
-                    <div class="guide-top" id="guideTop"></div>
-                    <div class="guide-bottom" id="guideBottom"></div>
-                    <div class="guide-left" id="guideLeft"></div>
-                    <div class="guide-right" id="guideRight"></div>
-
-                    <!-- content -->
-                    <div class="meta" id="metaDate">10 September 2025</div>
-
-                    <div class="to">To,<br>Rtn. <span id="previewMember" style="font-weight:700">—</span>,</div>
-
-                    <div class="body-paragraph" id="para1">
-                      We extend our deepest condolences on the passing of your <span id="previewRelation">—</span> <span id="previewDeceased">—</span> for the untimely loss of <span id="pronObj">her</span> life. Losing a family member is always difficult to face.
-                    </div>
-
-                    <div class="body-paragraph" id="para2">
-                      In this tough period of your life's journey, we are committed to being there for you. In light of the loss of your <span id="repeatRelation">—</span>, we are sympathetic to your efforts to move forward with your life's work.
-                    </div>
-
-                    <div class="body-paragraph" id="para3">
-                      <span id="pronSubj">She</span> will always be remembered with great admiration. May God give strength to you & your family during this difficult time.
-                    </div>
-
-                    <div class="signatures">
-                      <div>
-                        Warm Regards,<br><br>
-                        Rtn. Rajesh Kumar Narula<br>
-                        <div style="font-weight:400">(President)</div>
-                      </div>
-                      <div style="text-align:right">
-                        Rtn. Dr. D.S. Rathore<br>
-                        <div style="font-weight:400">(Secretary)</div>
-                      </div>
-                    </div>
-
-                  </div>
+              <div class="signatures" id="signs">
+                <div>
+                  Warm Regards,<br><br>
+                  Rtn. Rajesh Kumar Narula<br>
+                  <div class="sig-title">(President)</div>
+                </div>
+                <div style="text-align:right">
+                  Rtn. Dr. D.S. Rathore<br>
+                  <div class="sig-title">(Secretary)</div>
                 </div>
               </div>
-            </div>
 
+            </div>
           </div>
         </div>
       </div>
-
     </div>
+
   </div>
 
   <!-- html2pdf -->
   <script src="https://unpkg.com/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
 
   <script>
-    // Element refs
-    const topRange = document.getElementById('topRange');
-    const rightRange = document.getElementById('rightRange');
-    const bottomRange = document.getElementById('bottomRange');
-    const leftRange = document.getElementById('leftRange');
-    const topNumber = document.getElementById('topNumber');
-    const rightNumber = document.getElementById('rightNumber');
-    const bottomNumber = document.getElementById('bottomNumber');
-    const leftNumber = document.getElementById('leftNumber');
+    // DOM refs
+    const topRange = document.getElementById('topRange'), topNum = document.getElementById('topNum');
+    const rightRange = document.getElementById('rightRange'), rightNum = document.getElementById('rightNum');
+    const bottomRange = document.getElementById('bottomRange'), bottomNum = document.getElementById('bottomNum');
+    const leftRange = document.getElementById('leftRange'), leftNum = document.getElementById('leftNum');
 
-    const page = document.getElementById('page');
-    const pageOuter = document.getElementById('pageOuter');
-    const guideTop = document.getElementById('guideTop');
-    const guideBottom = document.getElementById('guideBottom');
-    const guideLeft = document.getElementById('guideLeft');
-    const guideRight = document.getElementById('guideRight');
+    const fontRange = document.getElementById('fontRange'), fontNum = document.getElementById('fontNum');
+    const scaleRange = document.getElementById('scaleRange'), scaleNum = document.getElementById('scaleNum');
 
-    const member = document.getElementById('member');
-    const relation = document.getElementById('relation');
-    const deceased = document.getElementById('deceased');
-    const gender = document.getElementById('gender');
+    const member = document.getElementById('member'), relation = document.getElementById('relation'), deceased = document.getElementById('deceased'), gender = document.getElementById('gender');
+    const bodyText = document.getElementById('bodyText');
 
+    const page = document.getElementById('page'), pageOuter = document.getElementById('pageOuter');
+    const guideTop = document.getElementById('guideTop'), guideBottom = document.getElementById('guideBottom'), guideLeft = document.getElementById('guideLeft'), guideRight = document.getElementById('guideRight');
+    const contentHtml = document.getElementById('contentHtml');
     const previewMember = document.getElementById('previewMember');
-    const previewRelation = document.getElementById('previewRelation');
-    const previewDeceased = document.getElementById('previewDeceased');
-    const repeatRelation = document.getElementById('repeatRelation');
-    const pronObj = document.getElementById('pronObj');
-    const pronSubj = document.getElementById('pronSubj');
 
-    // initialize inputs and two-way sync
-    function setInitialValues(){
-      const defaultVal = 25.4;
-      [topRange, rightRange, bottomRange, leftRange].forEach(r=>r.value=defaultVal);
-      [topNumber, rightNumber, bottomNumber, leftNumber].forEach(n=>n.value=defaultVal);
-      updatePagePaddingFromInputs();
+    const generateBtn = document.getElementById('generateBtn'), resetBtn = document.getElementById('resetBtn');
+
+    // Sync paired inputs
+    function bindRangeNumber(range, number){
+      range.addEventListener('input', ()=>{ number.value = range.value; updateFromControls(); });
+      number.addEventListener('input', ()=>{ range.value = number.value; updateFromControls(); });
     }
-    setInitialValues();
+    bindRangeNumber(topRange, topNum);
+    bindRangeNumber(rightRange, rightNum);
+    bindRangeNumber(bottomRange, bottomNum);
+    bindRangeNumber(leftRange, leftNum);
+    bindRangeNumber(fontRange, fontNum);
+    bindRangeNumber(scaleRange, scaleNum);
 
-    // helpers to convert mm string to CSS var and set overlay positions
-    function updatePagePaddingFromInputs(){
-      const t = parseFloat(topNumber.value || topRange.value);
-      const r = parseFloat(rightNumber.value || rightRange.value);
-      const b = parseFloat(bottomNumber.value || bottomRange.value);
-      const l = parseFloat(leftNumber.value || leftRange.value);
+    // init defaults
+    function resetDefaults(){
+      topRange.value = topNum.value = 25.4;
+      rightRange.value = rightNum.value = 25.4;
+      bottomRange.value = bottomNum.value = 25.4;
+      leftRange.value = leftNum.value = 25.4;
+      fontRange.value = fontNum.value = 12;
+      scaleRange.value = scaleNum.value = 45;
+      member.value = 'Rajneesh Parek';
+      relation.value = 'mother';
+      deceased.value = 'Madhubala Pareek';
+      gender.value = 'female';
+      bodyText.value = `We extend our deepest condolences on the passing of your <Relation> <Deceased> for the untimely loss of <her> life. Losing a family member is always difficult to face.
 
-      // Set CSS custom properties in mm units (used for the scaled preview)
-      page.style.setProperty('--pad-top-mm', t + 'mm');
-      page.style.setProperty('--pad-right-mm', r + 'mm');
-      page.style.setProperty('--pad-bottom-mm', b + 'mm');
-      page.style.setProperty('--pad-left-mm', l + 'mm');
+In this tough period of your life's journey, we are committed to being there for you. In light of the loss of your <Relation>, we are sympathetic to your efforts to move forward with your life's work.
 
-      // For the scaled preview we used padding via inline style earlier — but we update padding by setting element style (scale factor 0.45)
-      const scale = 0.45;
-      page.style.paddingTop = (t * scale) + 'mm';
-      page.style.paddingRight = (r * scale) + 'mm';
-      page.style.paddingBottom = (b * scale) + 'mm';
-      page.style.paddingLeft = (l * scale) + 'mm';
-
-      // place guide lines at those offsets (scaled)
-      guideTop.style.top = (t * scale) + 'mm';
-      guideBottom.style.top = `calc(${page.offsetHeight}px - ${b * scale}mm)`;
-      guideLeft.style.left = (l * scale) + 'mm';
-      guideRight.style.left = `calc(${page.offsetWidth}px - ${r * scale}mm)`;
-
-      // also update CSS variables at document root so we can use them if needed
-      document.documentElement.style.setProperty('--pad-top', t + 'mm');
-      document.documentElement.style.setProperty('--pad-right', r + 'mm');
-      document.documentElement.style.setProperty('--pad-bottom', b + 'mm');
-      document.documentElement.style.setProperty('--pad-left', l + 'mm');
+<She> will always be remembered with great admiration. May God give strength to you & your family during this difficult time.`;
+      updateFromControls();
     }
+    resetDefaults();
 
-    // sync range <-> number inputs
-    function syncRangeAndNumber(rangeEl, numEl){
-      rangeEl.addEventListener('input', ()=>{ numEl.value = rangeEl.value; updatePagePaddingFromInputs(); });
-      numEl.addEventListener('input', ()=>{ rangeEl.value = numEl.value; updatePagePaddingFromInputs(); });
-    }
-    syncRangeAndNumber(topRange, topNumber);
-    syncRangeAndNumber(rightRange, rightNumber);
-    syncRangeAndNumber(bottomRange, bottomNumber);
-    syncRangeAndNumber(leftRange, leftNumber);
+    // update preview content and styles
+    function updateFromControls(){
+      // margins (mm)
+      const t = parseFloat(topNum.value), r = parseFloat(rightNum.value), b = parseFloat(bottomNum.value), l = parseFloat(leftNum.value);
+      // scale percent
+      const scalePercent = parseFloat(scaleNum.value);
+      const scale = scalePercent / 100;
 
-    // update text placeholders
-    function updatePreviewText(){
-      previewMember.textContent = member.value.trim() || '—';
-      previewRelation.textContent = relation.value.trim() || '—';
-      previewDeceased.textContent = deceased.value.trim() || '—';
-      repeatRelation.textContent = relation.value.trim() || '—';
+      // apply padding to real page (for preview we scale by transform)
+      // page is full-size A4; using transform to scale to fit; to produce visual padding we set inline styles scaled.
+      page.style.paddingTop = t + 'mm';
+      page.style.paddingRight = r + 'mm';
+      page.style.paddingBottom = b + 'mm';
+      page.style.paddingLeft = l + 'mm';
+
+      // set transform scale on outer wrapper so the page is scaled and not clipped
+      page.style.transform = `scale(${scale})`;
+      // adjust outer wrapper size to accomodate scaled page and center
+      const pageOuterWidth = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--a4-w') || 210) * (scale/1); // not used directly; page's transform handles sizing
+
+      // set font size inside letter
+      const fontPt = parseFloat(fontNum.value) || 12;
+      page.style.fontSize = fontPt + 'pt';
+
+      // compute guide positions (they are absolute inside page, unscaled)
+      // top guide at paddingTop
+      guideTop.style.top = (t) + 'mm';
+      guideLeft.style.left = (l) + 'mm';
+      // bottom guide placed from top = page height - bottom padding
+      guideBottom.style.top = `calc(100% - ${b}mm)`;
+      guideRight.style.left = `calc(100% - ${r}mm)`;
+
+      // update textual content by replacing placeholders in bodyText
+      let text = bodyText.value;
+      // placeholders: <Relation>, <Deceased>, <her>/<his>/<their>, <She>/<He>/<They>
+      const rel = relation.value.trim() || '—';
+      const dec = deceased.value.trim() || '—';
       const g = gender.value;
-      if (g === 'male'){ pronObj.textContent='his'; pronSubj.textContent='He'; }
-      else if (g === 'female'){ pronObj.textContent='her'; pronSubj.textContent='She'; }
-      else { pronObj.textContent='their'; pronSubj.textContent='They'; }
+      let objPron='her', subjPron='She';
+      if (g === 'male'){ objPron='his'; subjPron='He'; }
+      else if (g === 'other'){ objPron='their'; subjPron='They'; }
+
+      text = text.replace(/<Relation>/g, rel).replace(/<Deceased>/g, dec).replace(/<her>/g, objPron).replace(/<She>/g, subjPron);
+
+      // Convert text paragraphs to HTML paragraphs; preserve blank lines
+      const paragraphs = text.split(/\n\s*\n/).map(p => `<div class="body-paragraph">${escapeHtml(p).replace(/\n/g,'<br>')}</div>`).join('\n');
+      contentHtml.innerHTML = paragraphs;
+
+      // update recipient display
+      previewMember.textContent = member.value.trim() || '—';
     }
-    [member, relation, deceased, gender].forEach(el=>el.addEventListener('input', updatePreviewText));
-    [member, relation, deceased, gender].forEach(el=>el.addEventListener('change', updatePreviewText));
-    updatePreviewText();
 
-    // When the page loads, also compute guide positions (some heights need DOM to be ready)
-    window.addEventListener('load', ()=>{ updatePagePaddingFromInputs(); });
+    // escape helper
+    function escapeHtml(str){ return String(str).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]) }); }
 
-    // Generate PDF -> use mm values for margins
-    document.getElementById('generateBtn').addEventListener('click', async ()=>{
-      updatePreviewText();
-      updatePagePaddingFromInputs();
+    // update when fields change
+    [topRange,rightRange,bottomRange,leftRange,topNum,rightNum,bottomNum,leftNum,fontRange,fontNum,scaleRange,scaleNum,member,relation,deceased,gender,bodyText].forEach(el=>{
+      el.addEventListener('input', updateFromControls);
+      el.addEventListener('change', updateFromControls);
+    });
 
-      // read current margin numbers (mm)
-      const topMm = parseFloat(topNumber.value || topRange.value);
-      const rightMm = parseFloat(rightNumber.value || rightRange.value);
-      const bottomMm = parseFloat(bottomNumber.value || bottomRange.value);
-      const leftMm = parseFloat(leftNumber.value || leftRange.value);
+    // reset
+    resetBtn.addEventListener('click', (e)=>{ e.preventDefault(); resetDefaults(); });
 
-      // Build the printable (full-size) page HTML using A4 and Calibri-compatible font.
-      // We'll create a new window/tab with same content (unscaled) and use html2pdf on that element to get better fidelity.
+    // generate PDF: build printable element at full A4 size with exact margins & font size
+    generateBtn.addEventListener('click', async ()=>{
+      updateFromControls();
+      const t = parseFloat(topNum.value), r = parseFloat(rightNum.value), b = parseFloat(bottomNum.value), l = parseFloat(leftNum.value);
+      const fontPt = parseFloat(fontNum.value) || 12;
+      const memberText = member.value.trim() || '—';
+      const rel = relation.value.trim() || '—';
+      const dec = deceased.value.trim() || '—';
+      const g = gender.value;
+      let objPron='her', subjPron='She';
+      if (g==='male'){ objPron='his'; subjPron='He'; } else if (g==='other'){ objPron='their'; subjPron='They'; }
+
+      // build printable container
       const printable = document.createElement('div');
       printable.style.width = '210mm';
       printable.style.minHeight = '297mm';
-      printable.style.padding = `${topMm}mm ${rightMm}mm ${bottomMm}mm ${leftMm}mm`;
       printable.style.boxSizing = 'border-box';
+      printable.style.padding = `${t}mm ${r}mm ${b}mm ${l}mm`;
       printable.style.fontFamily = `'Carlito', Calibri, sans-serif`;
-      printable.style.fontSize = '12pt';
+      printable.style.fontSize = fontPt + 'pt';
       printable.style.lineHeight = '1.5';
-      printable.style.color = '#000';
       printable.style.background = '#fff';
+      printable.style.color = '#000';
 
-      // fill content with exact wording
+      // compute date
       const dateText = (new Date()).toLocaleDateString(undefined,{day:'2-digit',month:'long',year:'numeric'});
-      const memberText = member.value.trim() || '—';
-      const relationText = relation.value.trim() || '—';
-      const deceasedText = deceased.value.trim() || '—';
-      let pronObjText = 'her', pronSubjText = 'She';
-      if (gender.value === 'male'){ pronObjText='his'; pronSubjText='He'; }
-      else if (gender.value === 'other'){ pronObjText='their'; pronSubjText='They'; }
+
+      // prepare body with placeholders replaced
+      let body = bodyText.value;
+      body = body.replace(/<Relation>/g, rel).replace(/<Deceased>/g, dec).replace(/<her>/g, objPron).replace(/<She>/g, subjPron);
+      // paragraphs -> <div>
+      const paras = body.split(/\n\s*\n/).map(p=>`<div style="margin:8mm 0;text-align:justify">${escapeHtml(p).replace(/\n/g,'<br>')}</div>`).join('');
 
       printable.innerHTML = `
-        <div style="text-align:right;margin-bottom:12mm">${dateText}</div>
-        <div style="margin-bottom:14mm">
-          To,<br>
-          Rtn. ${escapeHtml(memberText)},
-        </div>
-
-        <div style="margin:8mm 0 12mm 0; text-align:justify;">
-          We extend our deepest condolences on the passing of your ${escapeHtml(relationText)} ${escapeHtml(deceasedText)} for the untimely loss of ${escapeHtml(pronObjText)} life. Losing a family member is always difficult to face.
-        </div>
-
-        <div style="margin:8mm 0 12mm 0; text-align:justify;">
-          In this tough period of your life's journey, we are committed to being there for you. In light of the loss of your ${escapeHtml(relationText)}, we are sympathetic to your efforts to move forward with your life's work.
-        </div>
-
-        <div style="margin:8mm 0 20mm 0; text-align:justify;">
-          ${escapeHtml(pronSubjText)} will always be remembered with great admiration. May God give strength to you & your family during this difficult time.
-        </div>
-
+        <div style="text-align:right;margin-bottom:12mm">${escapeHtml(dateText)}</div>
+        <div style="margin-bottom:14mm">To,<br>Rtn. ${escapeHtml(memberText)},</div>
+        ${paras}
         <div style="display:flex;justify-content:space-between;margin-top:20mm">
           <div>
             Warm Regards,<br><br>
@@ -409,20 +337,19 @@
         </div>
       `;
 
-      // generate PDF from this printable element
-      const opt = {
-        margin: [topMm, rightMm, bottomMm, leftMm],
-        filename: `condolence_${(deceasedText||'deceased').replace(/\s+/g,'_')}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
-
-      // html2pdf can accept a DOM node; to avoid scaling issues we attach to body but hidden, then remove after.
+      // attach hidden to body to allow images/fonts to load (we have no external images)
       printable.style.position = 'fixed';
       printable.style.left = '-9999px';
       printable.style.top = '-9999px';
       document.body.appendChild(printable);
+
+      const opt = {
+        margin: [t, r, b, l], // mm units
+        filename: `condolence_${(dec||'deceased').replace(/\s+/g,'_')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
 
       try {
         await html2pdf().set(opt).from(printable).save();
@@ -431,85 +358,9 @@
       }
     });
 
-    // small helper to escape HTML
-    function escapeHtml(str){
-      return String(str).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])});
-    }
-
-    // On resize/update ensure guides calculate after layout
-    function refreshGuides(){
-      // compute scaled offsets
-      const scale = 0.45;
-      const t = parseFloat(topNumber.value || topRange.value);
-      const r = parseFloat(rightNumber.value || rightRange.value);
-      const b = parseFloat(bottomNumber.value || bottomRange.value);
-      const l = parseFloat(leftNumber.value || leftRange.value);
-      // top/left in mm scaled:
-      guideTop.style.top = (t * scale) + 'mm';
-      guideLeft.style.left = (l * scale) + 'mm';
-      // bottom and right: compute using page size
-      const pageH = page.offsetHeight;
-      const pageW = page.offsetWidth;
-      // bottom: page height - bottom offset
-      guideBottom.style.top = 'calc(100% - ' + (b * scale) + 'mm)';
-      guideRight.style.left = 'calc(100% - ' + (r * scale) + 'mm)';
-    }
-
-    // call refreshGuides when inputs change
-    [topRange, rightRange, bottomRange, leftRange, topNumber, rightNumber, bottomNumber, leftNumber].forEach(inp=>{
-      inp.addEventListener('input', ()=>{
-        // sync paired inputs
-        if (inp === topRange) topNumber.value = inp.value;
-        if (inp === rightRange) rightNumber.value = inp.value;
-        if (inp === bottomRange) bottomNumber.value = inp.value;
-        if (inp === leftRange) leftNumber.value = inp.value;
-        if (inp === topNumber) topRange.value = inp.value;
-        if (inp === rightNumber) rightRange.value = inp.value;
-        if (inp === bottomNumber) bottomRange.value = inp.value;
-        if (inp === leftNumber) leftRange.value = inp.value;
-
-        updatePagePaddingFromInputs();
-        refreshGuides();
-      });
-    });
-
-    // initialize page padding and guides on load
-    function updatePagePaddingFromInputs(){
-      const t = parseFloat(topNumber.value || topRange.value);
-      const r = parseFloat(rightNumber.value || rightRange.value);
-      const b = parseFloat(bottomNumber.value || bottomRange.value);
-      const l = parseFloat(leftNumber.value || leftRange.value);
-      const scale = 0.45;
-      page.style.paddingTop = (t * scale) + 'mm';
-      page.style.paddingRight = (r * scale) + 'mm';
-      page.style.paddingBottom = (b * scale) + 'mm';
-      page.style.paddingLeft = (l * scale) + 'mm';
-    }
-
-    // make sure preview text updates
-    [member, relation, deceased, gender].forEach(el=>{
-      el.addEventListener('input', updatePreviewText);
-      el.addEventListener('change', updatePreviewText);
-    });
-
-    function updatePreviewText(){
-      previewMember.textContent = member.value.trim() || '—';
-      previewRelation.textContent = relation.value.trim() || '—';
-      previewDeceased.textContent = deceased.value.trim() || '—';
-      repeatRelation.textContent = relation.value.trim() || '—';
-      const g = gender.value;
-      if (g === 'male'){ pronObj.textContent='his'; pronSubj.textContent='He'; }
-      else if (g === 'female'){ pronObj.textContent='her'; pronSubj.textContent='She'; }
-      else { pronObj.textContent='their'; pronSubj.textContent='They'; }
-    }
-
-    // initial render
-    updatePreviewText();
-    updatePagePaddingFromInputs();
-    refreshGuides();
-
-    // refresh guides if window resizes (preview scale depends on width)
-    window.addEventListener('resize', ()=>{ updatePagePaddingFromInputs(); refreshGuides(); });
+    // initial layout adjustments
+    window.addEventListener('load', ()=>{ updateFromControls(); });
+    window.addEventListener('resize', ()=>{ updateFromControls(); });
 
   </script>
 </body>
