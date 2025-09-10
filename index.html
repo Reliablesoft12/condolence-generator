@@ -3,193 +3,514 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Condolence Letter Generator</title>
+  <title>Condolence Letter — A4 (Visual Margin Editor)</title>
 
-  <!-- Calibri-compatible font -->
+  <!-- Carlito (Calibri-compatible) -->
   <link href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&display=swap" rel="stylesheet">
 
   <style>
-    :root {
-      --page-width:210mm;   /* A4 width */
-      --page-height:297mm;  /* A4 height */
+    :root{
+      --page-width:210mm;  /* A4 */
+      --page-height:297mm;
+      --pad-top:25.4mm;
+      --pad-right:25.4mm;
+      --pad-bottom:25.4mm;
+      --pad-left:25.4mm;
+      --ruler-size:30px;
     }
 
-    body {
+    *{box-sizing:border-box}
+    body{
       margin:0;
       font-family:'Carlito', Calibri, sans-serif;
-      background:#f7f9fb;
-      padding:20px;
+      background:#f4f7fb;
+      padding:18px;
+      color:#0b2540;
     }
-    .container {
-      display:grid;
-      grid-template-columns:400px 1fr;
-      gap:20px;
-      max-width:1100px;
-      margin:0 auto;
-    }
-    .card {
-      background:#fff;
-      padding:16px;
-      border-radius:8px;
-      box-shadow:0 2px 6px rgba(0,0,0,0.1);
-    }
-    h1 {margin:0 0 12px 0;font-size:18px;font-weight:600}
-    label{display:block;margin-top:10px;font-size:13px;color:#444}
-    input,select,textarea{
-      width:100%;
-      padding:8px 10px;
-      font-family:'Carlito', Calibri, sans-serif;
-      font-size:14px;
-      border:1px solid #ccc;
-      border-radius:6px;
-    }
-    textarea{min-height:60px;resize:vertical}
-    .btn{margin-top:14px;padding:10px 14px;border:none;border-radius:6px;cursor:pointer;font-weight:600}
-    .btn-primary{background:#0b75d6;color:#fff}
-    .preview-frame{background:#fff;border:1px solid #ddd;border-radius:8px;padding:12px;overflow:auto}
 
-    /* Printable letter */
-    .page {
-      width:var(--page-width);
-      min-height:var(--page-height);
-      padding:25.4mm; /* 1 inch margins all around */
+    .app {
+      max-width:1200px;
+      margin:0 auto;
+      display:grid;
+      grid-template-columns:360px 1fr;
+      gap:18px;
+    }
+
+    .panel {
       background:#fff;
-      font-size:12pt;
+      padding:14px;
+      border-radius:10px;
+      box-shadow:0 6px 20px rgba(10,20,40,0.06);
+    }
+
+    h2{margin:0 0 10px 0;font-size:18px}
+    label{display:block;margin-top:10px;font-size:13px;color:#3b4b63}
+    .row{display:flex;gap:8px;align-items:center;margin-top:8px}
+    input[type="number"]{width:80px;padding:8px;border-radius:6px;border:1px solid #d7e3f2}
+    input[type="range"]{flex:1}
+
+    .small{font-size:13px;color:#617089;margin-top:8px}
+
+    .controls-grid{display:grid;grid-template-columns:1fr;gap:10px}
+
+    .btn{
+      display:inline-flex;gap:8px;align-items:center;
+      padding:10px 14px;border-radius:8px;border:0;background:linear-gradient(90deg,#0b75d6,#06b6d4);color:#fff;font-weight:700;margin-top:12px;cursor:pointer;
+    }
+
+    /* Preview area */
+    .preview-wrap{position:relative;padding:12px}
+    .preview-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .preview-viewport{background:#edf3fb;padding:14px;border-radius:8px;border:1px solid #e2edf9;overflow:auto}
+
+    /* Ruler container */
+    .ruler-container{display:flex;gap:12px}
+    .ruler-vert{
+      width:var(--ruler-size);
+      height:calc(var(--page-height) * 0.45); /* visual scaling in viewport */
+      background-image: linear-gradient(to bottom, #ccd9ea 1px, transparent 1px);
+      background-size: 1mm 1mm;
+      border-right:1px solid #e6eef8;
+      box-shadow:inset -1px 0 0 rgba(0,0,0,0.02);
+    }
+    .ruler-horz{
+      height:var(--ruler-size);
+      width:calc(var(--page-width) * 0.45);
+      background-image: linear-gradient(to right, #ccd9ea 1px, transparent 1px);
+      background-size: 1mm 1mm;
+      border-bottom:1px solid #e6eef8;
+      box-shadow:inset 0 -1px 0 rgba(0,0,0,0.02);
+    }
+
+    /* Page preview scaled down */
+    .page-outer{position:relative; background:#fff; border:1px solid #dbeaf8; border-radius:6px; display:inline-block; box-shadow:0 8px 20px rgba(9,30,63,0.04);}
+    .page {
+      width: calc(var(--page-width) * 0.45); /* scale to fit */
+      height: calc(var(--page-height) * 0.45);
+      background:white;
+      position:relative;
+      box-sizing:border-box;
+      /* apply padding from CSS variables (mm units will be respected by browsers) */
+      padding: calc(var(--pad-top) * 0.45) calc(var(--pad-right) * 0.45) calc(var(--pad-bottom) * 0.45) calc(var(--pad-left) * 0.45);
       font-family:'Carlito', Calibri, sans-serif;
+      font-size:12pt;
       line-height:1.5;
       color:#000;
     }
-    .meta{text-align:right;margin-bottom:12mm}
-    .to{margin-bottom:14mm}
-    .to .recipient{font-weight:bold}
-    .body-paragraph{margin:8mm 0;text-align:justify}
-    .signatures{display:flex;justify-content:space-between;margin-top:20mm}
-    .sig-block{font-weight:bold}
-    .sig-title{font-weight:400;font-size:11pt}
+
+    /* guideline overlay lines (thin, subtle) */
+    .guide-top, .guide-bottom { position:absolute; left:0; right:0; height:1px; background:rgba(11,55,100,0.18); pointer-events:none; }
+    .guide-left, .guide-right { position:absolute; top:0; bottom:0; width:1px; background:rgba(11,55,100,0.18); pointer-events:none; }
+
+    /* content inside the page preview uses unscaled layout */
+    .page .meta{ text-align:right; margin-bottom:18px }
+    .page .to{ margin-bottom:20px }
+    .page .to .recipient{ font-weight:bold }
+    .page .body-paragraph{ margin:14px 0; text-align:justify }
+    .page .signatures{ display:flex; justify-content:space-between; margin-top:30px }
+    .note { font-size:13px; color:#445766; margin-top:10px }
+
+    /* input grid small screen */
+    @media(max-width:980px){
+      .app{grid-template-columns:1fr; padding-bottom:40px}
+      .ruler-vert{display:none}
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Left: form -->
-    <div class="card">
-      <h1>Condolence Letter Generator</h1>
-      <label>Date</label>
-      <input id="date" type="text" placeholder="e.g., 10 September 2025" />
+  <div class="app">
+    <!-- Controls panel -->
+    <div class="panel">
+      <h2>Margins & Content</h2>
+      <div class="small">Use the sliders or number inputs (mm). Watch the rulers and thin guideline lines on the preview to align with your physical letterhead.</div>
 
-      <label>Recipient / Member name</label>
-      <input id="member" type="text" placeholder="e.g., Rajneesh Parek" />
+      <div style="margin-top:12px">
+        <label>Top margin (mm)</label>
+        <div class="row">
+          <input id="topRange" type="range" min="0" max="80" value="25.4" step="0.1" />
+          <input id="topNumber" type="number" min="0" max="80" step="0.1" value="25.4" />
+        </div>
 
-      <label>Deceased person name</label>
-      <input id="deceased" type="text" placeholder="e.g., Madhubala Pareek" />
+        <label>Right margin (mm)</label>
+        <div class="row">
+          <input id="rightRange" type="range" min="0" max="80" value="25.4" step="0.1" />
+          <input id="rightNumber" type="number" min="0" max="80" step="0.1" value="25.4" />
+        </div>
 
-      <label>Relation</label>
-      <input id="relation" type="text" placeholder="e.g., mother" />
+        <label>Bottom margin (mm)</label>
+        <div class="row">
+          <input id="bottomRange" type="range" min="0" max="80" value="25.4" step="0.1" />
+          <input id="bottomNumber" type="number" min="0" max="80" step="0.1" value="25.4" />
+        </div>
 
-      <label>Gender</label>
-      <select id="gender">
-        <option value="female">Female (she/her)</option>
-        <option value="male">Male (he/his)</option>
-        <option value="other">Other (they/their)</option>
-      </select>
+        <label>Left margin (mm)</label>
+        <div class="row">
+          <input id="leftRange" type="range" min="0" max="80" value="25.4" step="0.1" />
+          <input id="leftNumber" type="number" min="0" max="80" step="0.1" value="25.4" />
+        </div>
 
-      <button id="generateBtn" class="btn btn-primary">Generate & Download PDF</button>
+        <hr style="margin:12px 0;border:none;border-top:1px solid #eef6ff">
+
+        <label>Recipient / Member name</label>
+        <input id="member" type="text" placeholder="Rtn. Rajneesh Parek" />
+
+        <label>Relation</label>
+        <input id="relation" type="text" placeholder="mother / brother" />
+
+        <label>Deceased person name</label>
+        <input id="deceased" type="text" placeholder="Madhubala Pareek" />
+
+        <label>Gender</label>
+        <select id="gender">
+          <option value="female">Female (she / her)</option>
+          <option value="male">Male (he / his)</option>
+          <option value="other">Other (they / their)</option>
+        </select>
+
+        <div style="margin-top:12px">
+          <button id="generateBtn" class="btn">Generate & Download PDF</button>
+          <div style="display:inline-block;margin-left:12px;font-size:13px;color:#42566b">A4 / mm units</div>
+        </div>
+
+        <div class="note">Tip: Position a physical letterhead page next to your screen and slide the guides to match the printed header/footer position; then generate PDF and print at 100% scale.</div>
+      </div>
     </div>
 
-    <!-- Right: preview -->
-    <div class="preview-frame">
-      <div class="page" id="page">
-        <div class="meta" id="metaDate">10 September 2025</div>
+    <!-- Preview panel -->
+    <div class="panel preview-wrap">
+      <div class="preview-topbar">
+        <div><strong>Live preview (scaled)</strong></div>
+        <div style="color:#51667a">Ruler = 1 mm ticks</div>
+      </div>
 
-        <div class="to">
-          To,<br>
-          Rtn. <span class="recipient" id="previewMember">Rajneesh Parek</span>,
-        </div>
+      <div class="preview-viewport">
+        <div class="ruler-container" style="align-items:flex-start">
+          <div class="ruler-vert" id="vertRuler"></div>
 
-        <div class="body-paragraph" id="para1">
-          We extend our deepest condolences on the passing of your <span id="previewRelation">mother</span> <span id="previewDeceased">Madhubala Pareek</span> for the untimely loss of <span id="pronObj">her</span> life. Losing a family member is always difficult to face.
-        </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div class="ruler-horz" id="horRuler"></div>
 
-        <div class="body-paragraph" id="para2">
-          In this tough period of your life's journey, we are committed to being there for you. In light of the loss of your <span id="repeatRelation">mother</span>, we are sympathetic to your efforts to move forward with your life's work.
-        </div>
+            <div style="display:flex;gap:12px;align-items:flex-start">
+              <div style="width: calc(var(--page-width) * 0.45);"> <!-- spacer to align ruler -->
+                <div class="page-outer" id="pageOuter">
+                  <div class="page" id="page">
+                    <!-- guideline lines -->
+                    <div class="guide-top" id="guideTop"></div>
+                    <div class="guide-bottom" id="guideBottom"></div>
+                    <div class="guide-left" id="guideLeft"></div>
+                    <div class="guide-right" id="guideRight"></div>
 
-        <div class="body-paragraph" id="para3">
-          <span id="pronSubj">She</span> will always be remembered with great admiration. May God give strength to you & your family during this difficult time.
-        </div>
+                    <!-- content -->
+                    <div class="meta" id="metaDate">10 September 2025</div>
 
-        <div class="signatures">
-          <div class="sig-block">
-            Warm Regards,<br><br>
-            Rtn. Rajesh Kumar Narula<br>
-            <span class="sig-title">(President)</span>
-          </div>
-          <div class="sig-block" style="text-align:right">
-            Rtn. Dr. D.S. Rathore<br>
-            <span class="sig-title">(Secretary)</span>
+                    <div class="to">To,<br>Rtn. <span id="previewMember" style="font-weight:700">—</span>,</div>
+
+                    <div class="body-paragraph" id="para1">
+                      We extend our deepest condolences on the passing of your <span id="previewRelation">—</span> <span id="previewDeceased">—</span> for the untimely loss of <span id="pronObj">her</span> life. Losing a family member is always difficult to face.
+                    </div>
+
+                    <div class="body-paragraph" id="para2">
+                      In this tough period of your life's journey, we are committed to being there for you. In light of the loss of your <span id="repeatRelation">—</span>, we are sympathetic to your efforts to move forward with your life's work.
+                    </div>
+
+                    <div class="body-paragraph" id="para3">
+                      <span id="pronSubj">She</span> will always be remembered with great admiration. May God give strength to you & your family during this difficult time.
+                    </div>
+
+                    <div class="signatures">
+                      <div>
+                        Warm Regards,<br><br>
+                        Rtn. Rajesh Kumar Narula<br>
+                        <div style="font-weight:400">(President)</div>
+                      </div>
+                      <div style="text-align:right">
+                        Rtn. Dr. D.S. Rathore<br>
+                        <div style="font-weight:400">(Secretary)</div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
+
     </div>
   </div>
 
   <!-- html2pdf -->
   <script src="https://unpkg.com/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+
   <script>
-    function readableToday(){
-      const d=new Date();
-      return d.toLocaleDateString(undefined,{day:'2-digit',month:'long',year:'numeric'});
+    // Element refs
+    const topRange = document.getElementById('topRange');
+    const rightRange = document.getElementById('rightRange');
+    const bottomRange = document.getElementById('bottomRange');
+    const leftRange = document.getElementById('leftRange');
+    const topNumber = document.getElementById('topNumber');
+    const rightNumber = document.getElementById('rightNumber');
+    const bottomNumber = document.getElementById('bottomNumber');
+    const leftNumber = document.getElementById('leftNumber');
+
+    const page = document.getElementById('page');
+    const pageOuter = document.getElementById('pageOuter');
+    const guideTop = document.getElementById('guideTop');
+    const guideBottom = document.getElementById('guideBottom');
+    const guideLeft = document.getElementById('guideLeft');
+    const guideRight = document.getElementById('guideRight');
+
+    const member = document.getElementById('member');
+    const relation = document.getElementById('relation');
+    const deceased = document.getElementById('deceased');
+    const gender = document.getElementById('gender');
+
+    const previewMember = document.getElementById('previewMember');
+    const previewRelation = document.getElementById('previewRelation');
+    const previewDeceased = document.getElementById('previewDeceased');
+    const repeatRelation = document.getElementById('repeatRelation');
+    const pronObj = document.getElementById('pronObj');
+    const pronSubj = document.getElementById('pronSubj');
+
+    // initialize inputs and two-way sync
+    function setInitialValues(){
+      const defaultVal = 25.4;
+      [topRange, rightRange, bottomRange, leftRange].forEach(r=>r.value=defaultVal);
+      [topNumber, rightNumber, bottomNumber, leftNumber].forEach(n=>n.value=defaultVal);
+      updatePagePaddingFromInputs();
+    }
+    setInitialValues();
+
+    // helpers to convert mm string to CSS var and set overlay positions
+    function updatePagePaddingFromInputs(){
+      const t = parseFloat(topNumber.value || topRange.value);
+      const r = parseFloat(rightNumber.value || rightRange.value);
+      const b = parseFloat(bottomNumber.value || bottomRange.value);
+      const l = parseFloat(leftNumber.value || leftRange.value);
+
+      // Set CSS custom properties in mm units (used for the scaled preview)
+      page.style.setProperty('--pad-top-mm', t + 'mm');
+      page.style.setProperty('--pad-right-mm', r + 'mm');
+      page.style.setProperty('--pad-bottom-mm', b + 'mm');
+      page.style.setProperty('--pad-left-mm', l + 'mm');
+
+      // For the scaled preview we used padding via inline style earlier — but we update padding by setting element style (scale factor 0.45)
+      const scale = 0.45;
+      page.style.paddingTop = (t * scale) + 'mm';
+      page.style.paddingRight = (r * scale) + 'mm';
+      page.style.paddingBottom = (b * scale) + 'mm';
+      page.style.paddingLeft = (l * scale) + 'mm';
+
+      // place guide lines at those offsets (scaled)
+      guideTop.style.top = (t * scale) + 'mm';
+      guideBottom.style.top = `calc(${page.offsetHeight}px - ${b * scale}mm)`;
+      guideLeft.style.left = (l * scale) + 'mm';
+      guideRight.style.left = `calc(${page.offsetWidth}px - ${r * scale}mm)`;
+
+      // also update CSS variables at document root so we can use them if needed
+      document.documentElement.style.setProperty('--pad-top', t + 'mm');
+      document.documentElement.style.setProperty('--pad-right', r + 'mm');
+      document.documentElement.style.setProperty('--pad-bottom', b + 'mm');
+      document.documentElement.style.setProperty('--pad-left', l + 'mm');
     }
 
-    const dateEl=document.getElementById('date'),
-          memberEl=document.getElementById('member'),
-          deceasedEl=document.getElementById('deceased'),
-          relationEl=document.getElementById('relation'),
-          genderEl=document.getElementById('gender');
-
-    const metaDate=document.getElementById('metaDate'),
-          prevMember=document.getElementById('previewMember'),
-          prevDeceased=document.getElementById('previewDeceased'),
-          prevRelation=document.getElementById('previewRelation'),
-          repeatRelation=document.getElementById('repeatRelation'),
-          pronObj=document.getElementById('pronObj'),
-          pronSubj=document.getElementById('pronSubj');
-
-    const PR={
-      male:{obj:'his',subj:'He'},
-      female:{obj:'her',subj:'She'},
-      other:{obj:'their',subj:'They'}
-    };
-
-    function updatePreview(){
-      metaDate.textContent=dateEl.value.trim()||readableToday();
-      prevMember.textContent=memberEl.value.trim()||'—';
-      prevDeceased.textContent=deceasedEl.value.trim()||'—';
-      prevRelation.textContent=relationEl.value.trim()||'—';
-      repeatRelation.textContent=relationEl.value.trim()||'—';
-      const g=PR[genderEl.value]||PR.other;
-      pronObj.textContent=g.obj;
-      pronSubj.textContent=g.subj;
+    // sync range <-> number inputs
+    function syncRangeAndNumber(rangeEl, numEl){
+      rangeEl.addEventListener('input', ()=>{ numEl.value = rangeEl.value; updatePagePaddingFromInputs(); });
+      numEl.addEventListener('input', ()=>{ rangeEl.value = numEl.value; updatePagePaddingFromInputs(); });
     }
+    syncRangeAndNumber(topRange, topNumber);
+    syncRangeAndNumber(rightRange, rightNumber);
+    syncRangeAndNumber(bottomRange, bottomNumber);
+    syncRangeAndNumber(leftRange, leftNumber);
 
-    [dateEl,memberEl,deceasedEl,relationEl,genderEl].forEach(el=>{
-      el.addEventListener('input',updatePreview);
-      el.addEventListener('change',updatePreview);
-    });
+    // update text placeholders
+    function updatePreviewText(){
+      previewMember.textContent = member.value.trim() || '—';
+      previewRelation.textContent = relation.value.trim() || '—';
+      previewDeceased.textContent = deceased.value.trim() || '—';
+      repeatRelation.textContent = relation.value.trim() || '—';
+      const g = gender.value;
+      if (g === 'male'){ pronObj.textContent='his'; pronSubj.textContent='He'; }
+      else if (g === 'female'){ pronObj.textContent='her'; pronSubj.textContent='She'; }
+      else { pronObj.textContent='their'; pronSubj.textContent='They'; }
+    }
+    [member, relation, deceased, gender].forEach(el=>el.addEventListener('input', updatePreviewText));
+    [member, relation, deceased, gender].forEach(el=>el.addEventListener('change', updatePreviewText));
+    updatePreviewText();
 
-    document.getElementById('generateBtn').addEventListener('click',()=>{
-      updatePreview();
-      const element=document.getElementById('page');
-      const opt={
-        margin:[25.4,25.4,25.4,25.4], // top,right,bottom,left in mm
-        filename:`condolence_${(deceasedEl.value||'deceased').replace(/\s+/g,'_')}.pdf`,
-        image:{type:'jpeg',quality:0.98},
-        html2canvas:{scale:2},
-        jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
+    // When the page loads, also compute guide positions (some heights need DOM to be ready)
+    window.addEventListener('load', ()=>{ updatePagePaddingFromInputs(); });
+
+    // Generate PDF -> use mm values for margins
+    document.getElementById('generateBtn').addEventListener('click', async ()=>{
+      updatePreviewText();
+      updatePagePaddingFromInputs();
+
+      // read current margin numbers (mm)
+      const topMm = parseFloat(topNumber.value || topRange.value);
+      const rightMm = parseFloat(rightNumber.value || rightRange.value);
+      const bottomMm = parseFloat(bottomNumber.value || bottomRange.value);
+      const leftMm = parseFloat(leftNumber.value || leftRange.value);
+
+      // Build the printable (full-size) page HTML using A4 and Calibri-compatible font.
+      // We'll create a new window/tab with same content (unscaled) and use html2pdf on that element to get better fidelity.
+      const printable = document.createElement('div');
+      printable.style.width = '210mm';
+      printable.style.minHeight = '297mm';
+      printable.style.padding = `${topMm}mm ${rightMm}mm ${bottomMm}mm ${leftMm}mm`;
+      printable.style.boxSizing = 'border-box';
+      printable.style.fontFamily = `'Carlito', Calibri, sans-serif`;
+      printable.style.fontSize = '12pt';
+      printable.style.lineHeight = '1.5';
+      printable.style.color = '#000';
+      printable.style.background = '#fff';
+
+      // fill content with exact wording
+      const dateText = (new Date()).toLocaleDateString(undefined,{day:'2-digit',month:'long',year:'numeric'});
+      const memberText = member.value.trim() || '—';
+      const relationText = relation.value.trim() || '—';
+      const deceasedText = deceased.value.trim() || '—';
+      let pronObjText = 'her', pronSubjText = 'She';
+      if (gender.value === 'male'){ pronObjText='his'; pronSubjText='He'; }
+      else if (gender.value === 'other'){ pronObjText='their'; pronSubjText='They'; }
+
+      printable.innerHTML = `
+        <div style="text-align:right;margin-bottom:12mm">${dateText}</div>
+        <div style="margin-bottom:14mm">
+          To,<br>
+          Rtn. ${escapeHtml(memberText)},
+        </div>
+
+        <div style="margin:8mm 0 12mm 0; text-align:justify;">
+          We extend our deepest condolences on the passing of your ${escapeHtml(relationText)} ${escapeHtml(deceasedText)} for the untimely loss of ${escapeHtml(pronObjText)} life. Losing a family member is always difficult to face.
+        </div>
+
+        <div style="margin:8mm 0 12mm 0; text-align:justify;">
+          In this tough period of your life's journey, we are committed to being there for you. In light of the loss of your ${escapeHtml(relationText)}, we are sympathetic to your efforts to move forward with your life's work.
+        </div>
+
+        <div style="margin:8mm 0 20mm 0; text-align:justify;">
+          ${escapeHtml(pronSubjText)} will always be remembered with great admiration. May God give strength to you & your family during this difficult time.
+        </div>
+
+        <div style="display:flex;justify-content:space-between;margin-top:20mm">
+          <div>
+            Warm Regards,<br><br>
+            Rtn. Rajesh Kumar Narula<br>
+            <div style="font-weight:400">(President)</div>
+          </div>
+          <div style="text-align:right">
+            Rtn. Dr. D.S. Rathore<br>
+            <div style="font-weight:400">(Secretary)</div>
+          </div>
+        </div>
+      `;
+
+      // generate PDF from this printable element
+      const opt = {
+        margin: [topMm, rightMm, bottomMm, leftMm],
+        filename: `condolence_${(deceasedText||'deceased').replace(/\s+/g,'_')}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
-      html2pdf().set(opt).from(element).save();
+
+      // html2pdf can accept a DOM node; to avoid scaling issues we attach to body but hidden, then remove after.
+      printable.style.position = 'fixed';
+      printable.style.left = '-9999px';
+      printable.style.top = '-9999px';
+      document.body.appendChild(printable);
+
+      try {
+        await html2pdf().set(opt).from(printable).save();
+      } finally {
+        printable.remove();
+      }
     });
 
-    document.addEventListener('DOMContentLoaded',updatePreview);
+    // small helper to escape HTML
+    function escapeHtml(str){
+      return String(str).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])});
+    }
+
+    // On resize/update ensure guides calculate after layout
+    function refreshGuides(){
+      // compute scaled offsets
+      const scale = 0.45;
+      const t = parseFloat(topNumber.value || topRange.value);
+      const r = parseFloat(rightNumber.value || rightRange.value);
+      const b = parseFloat(bottomNumber.value || bottomRange.value);
+      const l = parseFloat(leftNumber.value || leftRange.value);
+      // top/left in mm scaled:
+      guideTop.style.top = (t * scale) + 'mm';
+      guideLeft.style.left = (l * scale) + 'mm';
+      // bottom and right: compute using page size
+      const pageH = page.offsetHeight;
+      const pageW = page.offsetWidth;
+      // bottom: page height - bottom offset
+      guideBottom.style.top = 'calc(100% - ' + (b * scale) + 'mm)';
+      guideRight.style.left = 'calc(100% - ' + (r * scale) + 'mm)';
+    }
+
+    // call refreshGuides when inputs change
+    [topRange, rightRange, bottomRange, leftRange, topNumber, rightNumber, bottomNumber, leftNumber].forEach(inp=>{
+      inp.addEventListener('input', ()=>{
+        // sync paired inputs
+        if (inp === topRange) topNumber.value = inp.value;
+        if (inp === rightRange) rightNumber.value = inp.value;
+        if (inp === bottomRange) bottomNumber.value = inp.value;
+        if (inp === leftRange) leftNumber.value = inp.value;
+        if (inp === topNumber) topRange.value = inp.value;
+        if (inp === rightNumber) rightRange.value = inp.value;
+        if (inp === bottomNumber) bottomRange.value = inp.value;
+        if (inp === leftNumber) leftRange.value = inp.value;
+
+        updatePagePaddingFromInputs();
+        refreshGuides();
+      });
+    });
+
+    // initialize page padding and guides on load
+    function updatePagePaddingFromInputs(){
+      const t = parseFloat(topNumber.value || topRange.value);
+      const r = parseFloat(rightNumber.value || rightRange.value);
+      const b = parseFloat(bottomNumber.value || bottomRange.value);
+      const l = parseFloat(leftNumber.value || leftRange.value);
+      const scale = 0.45;
+      page.style.paddingTop = (t * scale) + 'mm';
+      page.style.paddingRight = (r * scale) + 'mm';
+      page.style.paddingBottom = (b * scale) + 'mm';
+      page.style.paddingLeft = (l * scale) + 'mm';
+    }
+
+    // make sure preview text updates
+    [member, relation, deceased, gender].forEach(el=>{
+      el.addEventListener('input', updatePreviewText);
+      el.addEventListener('change', updatePreviewText);
+    });
+
+    function updatePreviewText(){
+      previewMember.textContent = member.value.trim() || '—';
+      previewRelation.textContent = relation.value.trim() || '—';
+      previewDeceased.textContent = deceased.value.trim() || '—';
+      repeatRelation.textContent = relation.value.trim() || '—';
+      const g = gender.value;
+      if (g === 'male'){ pronObj.textContent='his'; pronSubj.textContent='He'; }
+      else if (g === 'female'){ pronObj.textContent='her'; pronSubj.textContent='She'; }
+      else { pronObj.textContent='their'; pronSubj.textContent='They'; }
+    }
+
+    // initial render
+    updatePreviewText();
+    updatePagePaddingFromInputs();
+    refreshGuides();
+
+    // refresh guides if window resizes (preview scale depends on width)
+    window.addEventListener('resize', ()=>{ updatePagePaddingFromInputs(); refreshGuides(); });
+
   </script>
 </body>
 </html>
